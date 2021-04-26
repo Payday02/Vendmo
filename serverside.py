@@ -45,7 +45,7 @@ while 1:
 
                 try:
                     if (authentication != emailauth):
-                        print("This shit aint gucci!")
+                        print("Unverified Transaction")
                         print("Transaction:",subject)
                         print("Timestamp:",timestamp)
                         continue
@@ -65,7 +65,7 @@ while 1:
                     print("This shit aint gucci\n")
                     continue
     except:
-        print("***EXCEPTION***ERROR***EXCEPTION***ERROR***EXCEPTION***ERROR***EXCEPTION***ERROR***EXCEPTION***\n")
+        print("***EXCEPTION***\n")
         print("\nConnecting to server ", server, " on port ", port, " and logging in as ", username)
         mail = imaplib.IMAP4_SSL(server, port)
         typ, data = mail.login(username, password)

@@ -9,20 +9,19 @@
 #define RESET_PIN 13 // bridge this to 'RESET' pin
 #define SS_PIN_W5100  10 // W5100 (eth shield) SS Pin
 
-const double denominations[] = {0.25, 0.10, 0.05}; // Q, D, N
-
-const char auth[] = "3a27b4203e1245d99ee024ec3ab7022c";
+const char auth[] = "";   //Enter Blynk Token Here
 WidgetTerminal terminal(V0);
 WidgetLED led1(V10);
 MatchState ms; // regex
 EthernetClient client;
-
+extern uint8_t mdb_state;
+uint8_t state;
 volatile double manualAmount = 0;
 
 void setup() {
   digitalWrite(RESET_PIN, HIGH); // since it's active-low
   pinMode(RESET_PIN, OUTPUT);
-
+  
   setup_usart(0,38400,8,'N',1);
   setup_usart(1,9600,9,'N',1);
   
@@ -31,14 +30,24 @@ void setup() {
   terminal.println("Blynk connection established.");
   terminal.flush();
 
-  sei(); // idek what this really changes. You look it up.
+  state = mdb_state;
+  terminal.print("starting mdb_state: ");
+  terminal.println(mdb_state);
+  
 }
 
 void loop() {
   mdb_cmd_handler();
   uplink_cmd_handler();
-
   Blynk.run();
+  
+//  if (state != mdb_state) {
+//   terminal.print("mdb_state: ");
+//   terminal.println(mdb_state);
+//  }
+//  state = mdb_state;
+  terminal.print("mdb_state: ");
+  terminal.println(mdb_state);
 }
 
 /*
