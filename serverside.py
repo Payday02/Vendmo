@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-
+"""
+ * Project: Vendmo
+ * File name: serverside.py
+ * Description:  Email Parsing to Blynk
+ *
+ * @author Paden Davis
+ * @email pdavis77@gatech.edu
+ *
+ """
 import imaplib
 import requests
 import time

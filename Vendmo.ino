@@ -1,3 +1,13 @@
+/**
+ * Project: Vendmo
+ * File name: Vendmo.ino
+ * Description:  Blynk event handler and MDB interface
+ *   
+ * @author Paden Davis
+ * @email pdavis77@gatech.edu
+ *   
+ */
+
 #include <SPI.h>
 #include <Ethernet.h>
 #include <BlynkSimpleEthernet.h>
@@ -37,48 +47,76 @@ void setup() {
 }
 
 void loop() {
+  Blynk.run();
   mdb_cmd_handler();
   uplink_cmd_handler();
-  Blynk.run();
+
   
 //  if (state != mdb_state) {
 //   terminal.print("mdb_state: ");
 //   terminal.println(mdb_state);
 //  }
 //  state = mdb_state;
-  terminal.print("mdb_state: ");
-  terminal.println(mdb_state);
+//  terminal.print("mdb_state: ");
+//  terminal.println(mdb_state);
 }
 
-/*
- * Handler for two Cashless Device active states:
- * ENABLED -- device is waiting for a new card
- * VEND    -- device is busy making transactions with the server
- */
-//void sessionHandler(void)
-//{
-//    switch(CSH_GetDeviceState())
-//    {
-//        case CSH_S_ENABLED:
-//          RFID_readerHandler();
-//          break;
-//        case CSH_S_VEND:
-//          transactionHandler();
-//          break;
-//    }
-//    char c = Debug.read();
-//    if (c == 0x30)
-//        CSH_SetPollState(CSH_END_SESSION);
-//}
-
-
+char* dtoa(double dN, char *cMJA, int iP) {
+  char *ret = cMJA;
+  long lP=1;
+  byte bW=iP;
+  
+  while (bW>0) { 
+    lP=lP*10;
+    bW--;  
+  }
+  
+  long lL = long(dN);
+  double dD=(dN-double(lL))* double(lP); 
+  if (dN>=0) {
+    dD=(dD + 0.5);  
+  } 
+  else {
+    dD=(dD-0.5); 
+  }
+  
+  long lR=abs(long(dD));
+  lL=abs(lL);  
+  if (lR==lP) {
+    lL=lL+1;
+    lR=0;  
+  }
+  if ((dN<0) & ((lR+lL)>0)) {
+    *cMJA++ = '-';  
+  } 
+  ltoa(lL, cMJA, 10);
+  if (iP>0) {
+    while (*cMJA != '\0') {
+      cMJA++; 
+    }
+    *cMJA++ = '.';
+    lP=10; 
+    while (iP>1) {
+      if (lR< lP) {
+        *cMJA='0';
+        cMJA++;
+      }
+      lP=lP*10;
+      iP--; 
+    }
+    ltoa(lR, cMJA, 10);
+  }  
+  return ret; 
+}
 /*
  * TODO docstring
  * maybe uint16_t instead of double?
  */
-//void vend(double amount) {
-//  terminal.println("pretending to vend");
-//}
+void vend(double amount) {
+  char* amnt;
+  dtoa(amount, amnt, 2);
+  cmd_approve_vend(amnt);
+}
 
 BLYNK_WRITE(V0) { // blynk terminal inbound data
   String cmd = param.asStr();
@@ -102,7 +140,7 @@ BLYNK_WRITE(V2) { // send button
   if (param.asInt()) { // when pressed
     terminal.println("Vending manually:");
     terminal.flush();
-//    vend(manualAmount);
+    vend(manualAmount);
   }
 }
 
@@ -120,7 +158,7 @@ BLYNK_WRITE(V9) { // Handling HTTP request
     double payment = strPayment.toDouble();
     
     Blynk.virtualWrite(V5, sender, payment, timestamp); // autofill form
-//    vend(max(payment, 10.00)); // cap at ten bucks
+    vend(max(payment, 10.00)); // cap at ten bucks
   } else {
     terminal.println("WARNING: HTTP REQUEST INVALID");
   }
