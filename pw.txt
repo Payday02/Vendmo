@@ -1,0 +1,7 @@
+server
+port
+username
+password
+auth_token
+emailVerification
+emailAuthentication
